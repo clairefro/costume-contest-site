@@ -1,3 +1,4 @@
+const path = require("path");
 const prod = process.env.NODE_ENV === "production";
 
 const HtmlWebpackPlugin = require("html-webpack-plugin");
@@ -5,9 +6,10 @@ const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 module.exports = {
   mode: prod ? "production" : "development",
-  entry: "./src/index.tsx",
+  entry: path.join(__dirname, "src", "index.tsx"),
   output: {
     path: __dirname + "/dist/",
+    filename: "bundle.js",
   },
   module: {
     rules: [
@@ -15,13 +17,25 @@ module.exports = {
         test: /\.(ts|tsx)$/,
         exclude: /node_modules/,
         resolve: {
-          extensions: [".ts", ".tsx", ".js", ".json"],
+          extensions: [".ts", ".tsx"],
         },
-        use: "ts-loader",
+        use: "babel-loader",
       },
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader", "postcss-loader"],
+        use: [
+          MiniCssExtractPlugin.loader,
+          "css-loader",
+          {
+            loader: "postcss-loader", // postcss loader needed for tailwindcss
+            options: {
+              postcssOptions: {
+                ident: "postcss",
+                plugins: [require("tailwindcss"), require("autoprefixer")],
+              },
+            },
+          },
+        ],
       },
       {
         test: /\.(eot|svg|ttf|woff|woff2|png|jpg|gif)$/i,
@@ -32,7 +46,7 @@ module.exports = {
   devtool: prod ? undefined : "source-map",
   plugins: [
     new HtmlWebpackPlugin({
-      template: "index.html",
+      template: path.join(__dirname, "public", "index.html"),
     }),
     new MiniCssExtractPlugin(),
   ],
