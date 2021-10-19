@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import "./styles/index.css";
+import "../styles/index.css";
 import "tailwindcss/tailwind.css";
 const App: React.FC = (props) => {
   return (
