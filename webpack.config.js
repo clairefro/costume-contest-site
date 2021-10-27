@@ -10,6 +10,7 @@ module.exports = {
   output: {
     path: __dirname + "/dist/",
     filename: "bundle.js",
+    publicPath: "/",
   },
   module: {
     rules: [
@@ -50,4 +51,7 @@ module.exports = {
     }),
     new MiniCssExtractPlugin(),
   ],
+  devServer: {
+    historyApiFallback: true,
+  },
 };
