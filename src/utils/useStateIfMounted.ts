@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useComponentMounted } from "./useComponentMounted";
 
 const useStateIfMounted = <T>(
-  initialVal: any
+  initialVal: T
 ): [T, React.Dispatch<React.SetStateAction<T>>] => {
   const isMounted = useComponentMounted();
   const [state, setState] = useState<T>(initialVal);
