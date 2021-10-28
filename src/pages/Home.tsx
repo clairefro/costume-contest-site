@@ -1,42 +1,47 @@
-import React, { FC, useContext, useEffect, useRef, useState } from "react";
+import React, {
+  FC,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { CostumeCard } from "../components/CostumeCard";
 import { AppContext } from "../context/AppContext";
 
-interface Contestant {
-  id: string;
-  name: string;
-  costumeTitle: string;
-  costumeImgUrl: string;
-  city: string;
-  country: string;
-  votes: number;
-}
-
 const Home: FC = () => {
-  const unmounted = useRef(false);
+  const mounted = useRef(true);
   const [contestants, setContestants] = useState<Contestant[]>([]);
   const { api } = useContext(AppContext);
 
   useEffect(() => {
     return () => {
-      unmounted.current = true;
+      mounted.current = false;
+      console.log("unmounted");
     };
   }, []);
 
-  useEffect(() => {
-    const getContestants = async (): Promise<void> => {
-      const res = (await api.getContestants()) as Contestant[];
-      // TODO: Fix memory leak
-      // for preventing memory leak
-      if (!unmounted.current) {
+  const getContestants = useCallback(async (): Promise<void> => {
+    try {
+      console.log("1", mounted.current);
+      const res = await api.getContestants();
+      if (mounted.current) {
         setContestants(res);
       }
-    };
+    } catch (err) {
+      console.error(err);
+    }
+  }, []);
 
-    getContestants();
+  useEffect(() => {
+    let didCancel = false;
+
+    if (!didCancel) {
+      getContestants();
+    }
 
     return () => {
-      setContestants([]);
+      didCancel = true;
     };
   }, []);
 
@@ -46,10 +51,11 @@ const Home: FC = () => {
 
   return (
     <div>
-      <p className="text-red-300 font-bold">This is the homepage</p>
-      {contestants.map((c) => (
-        <CostumeCard contestant={c} />
-      ))}
+      <div className="grid grid-cols-1 md:grid-cols-3 grid-gap-2 p-4">
+        {contestants.map((c) => (
+          <CostumeCard contestant={c} key={c.id} />
+        ))}
+      </div>
     </div>
   );
 };
