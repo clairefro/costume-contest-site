@@ -8,41 +8,24 @@ import React, {
 } from "react";
 import { CostumeCard } from "../components/CostumeCard";
 import { AppContext } from "../context/AppContext";
+import { useStateIfMounted } from "../utils/useStateIfMounted";
 
 const Home: FC = () => {
-  const mounted = useRef(true);
-  const [contestants, setContestants] = useState<Contestant[]>([]);
+  const [contestants, setContestants] = useStateIfMounted<Contestant[]>([]);
   const { api } = useContext(AppContext);
 
   useEffect(() => {
-    return () => {
-      mounted.current = false;
-      console.log("unmounted");
-    };
-  }, []);
+    const getContestants = async (): Promise<void> => {
+      try {
+        const res = await api.getContestants();
 
-  const getContestants = useCallback(async (): Promise<void> => {
-    try {
-      console.log("1", mounted.current);
-      const res = await api.getContestants();
-      if (mounted.current) {
         setContestants(res);
+      } catch (err) {
+        console.error(err);
       }
-    } catch (err) {
-      console.error(err);
-    }
-  }, []);
-
-  useEffect(() => {
-    let didCancel = false;
-
-    if (!didCancel) {
-      getContestants();
-    }
-
-    return () => {
-      didCancel = true;
     };
+
+    getContestants();
   }, []);
 
   useEffect(() => {
